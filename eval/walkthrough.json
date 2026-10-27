@@ -1,0 +1,75 @@
+{
+  "startup_name": "aeropulse_inj",
+  "category": "drone",
+  "docs_count": 5,
+  "chunks": 5,
+  "events": [
+    {
+      "step": 1,
+      "agent": "Ingest",
+      "detail": "Flagged suspicious instructions in D5-C1 (technical_and_compliance.md)"
+    },
+    {
+      "step": 2,
+      "agent": "Profile",
+      "detail": "Built startup profile from the data room."
+    },
+    {
+      "step": 3,
+      "agent": "Specialists",
+      "detail": "Generated 5 evidence-backed findings."
+    },
+    {
+      "step": 4,
+      "agent": "Verifier",
+      "detail": "Kept 5 findings and dropped 0."
+    },
+    {
+      "step": 5,
+      "agent": "Scoring",
+      "detail": "Computed score 100 \u2014 Pass for now."
+    }
+  ],
+  "findings_count": 5,
+  "verified_findings": 5,
+  "dropped_findings": 0,
+  "overall_score": 100,
+  "recommendation": "Pass for now",
+  "top_risks": [
+    {
+      "code": "MFG-1",
+      "title": "Single-source critical component",
+      "severity": 4,
+      "citation": "SoleSource Components"
+    },
+    {
+      "code": "ECON-2",
+      "title": "Insufficient capital or runway",
+      "severity": 3,
+      "citation": "cash is $900000"
+    },
+    {
+      "code": "TECH-1",
+      "title": "Unproven core technology",
+      "severity": 4,
+      "citation": "Independent testing is planned next quarter."
+    },
+    {
+      "code": "MFG-2",
+      "title": "Prototype-to-production gap",
+      "severity": 4,
+      "citation": "no contract manufacturer selected"
+    },
+    {
+      "code": "REG-1",
+      "title": "Required certification missing",
+      "severity": 4,
+      "citation": "certification are planned but not complete"
+    }
+  ],
+  "model_calls": 1,
+  "input_tokens": 106,
+  "cached_tokens": 0,
+  "output_tokens": 32,
+  "seconds": 0.0
+}

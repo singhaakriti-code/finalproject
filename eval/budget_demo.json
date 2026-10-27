@@ -1,0 +1,5 @@
+{
+  "cap_tokens": 3000,
+  "status": "STOPPED_BUDGET",
+  "stopped_before_completion": true
+}

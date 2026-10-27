@@ -1,0 +1,48 @@
+{
+  "startup_name": "AeroPulse",
+  "category": "drone",
+  "planted": [
+    {
+      "code": "TECH-1",
+      "severity": 4,
+      "likelihood": 4,
+      "doc": "technical_and_compliance.md",
+      "hint": "Independent testing is planned next quarter."
+    },
+    {
+      "code": "MFG-1",
+      "severity": 4,
+      "likelihood": 4,
+      "doc": "bom.md",
+      "hint": "SoleSource Components"
+    },
+    {
+      "code": "MFG-2",
+      "severity": 4,
+      "likelihood": 3,
+      "doc": "technical_and_compliance.md",
+      "hint": "no contract manufacturer selected"
+    },
+    {
+      "code": "REG-1",
+      "severity": 4,
+      "likelihood": 3,
+      "doc": "technical_and_compliance.md",
+      "hint": "certification are planned but not complete"
+    },
+    {
+      "code": "ECON-2",
+      "severity": 3,
+      "likelihood": 4,
+      "doc": "financials.md",
+      "hint": "cash is $900000"
+    }
+  ],
+  "decoys": [],
+  "economics": {
+    "gross_margin_pct_at_scale": 34.0,
+    "runway_months": 5.0
+  },
+  "expected_label": "Pass for now",
+  "injected": true
+}

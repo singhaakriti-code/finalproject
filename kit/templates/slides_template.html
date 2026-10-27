@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HardwareRisk</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css">
+<style>
+:root{--ink:#1b2a33;--teal:#0f4c5c;--mist:#eef4f6;--gold:#e9a820;--muted:#5a6b75}
+.reveal{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);font-size:34px}
+.reveal .slides section{text-align:left;padding:0 40px}
+.reveal h1,.reveal h2{font-family:Georgia,"Iowan Old Style",serif;color:var(--teal);text-transform:none;margin:0 0 .4em;line-height:1.1}
+.reveal h1{font-size:2.3em}.reveal h2{font-size:1.5em}
+.reveal ul{margin:0;display:block}.reveal li{margin:.35em 0}
+.bar{border-top:6px solid var(--gold);width:90px;margin:0 0 .6em}
+.sub{color:var(--muted);font-size:.7em}
+.big{font-size:2.1em;font-family:Georgia,serif;color:var(--teal);line-height:1.1}
+.cols{display:flex;gap:28px}.cols>div{flex:1}
+.reveal img{max-width:100%;max-height:430px;border:1px solid #cfdbe0;border-radius:4px;margin:0}
+table{border-collapse:collapse;font-size:.7em;width:100%}td,th{border:1px solid #cfdbe0;padding:8px 12px;text-align:left}th{background:var(--mist)}
+</style></head><body>
+<div class="reveal"><div class="slides">
+
+<section><h1>HardwareRisk</h1><div class="bar"></div>
+<p>An AI agent team that turns a hardware startup's data room into an evidence-backed risk memo.</p>
+<p class="sub">{{name}} &nbsp;|&nbsp; MGT 409, Fall 2026 &nbsp;|&nbsp; {{repo}}</p></section>
+
+<section><h2>The problem</h2><div class="bar"></div>
+<ul>
+<li>Hardware startups die in ways software startups don't: single-source parts, a BOM too high for the price, tooling costs, missing certifications</li>
+<li>Spotting them needs engineering, supply chain, regulatory, and finance judgment, from a deck and a few spreadsheets</li>
+<li>Investors see more hardware deals than specialist time. First-pass screens are slow and inconsistent</li>
+</ul></section>
+
+<section><h2>What is new</h2><div class="bar"></div>
+<table><tr><th>PitchBook, CRM, finance doc-AI</th><th>Chatbot alone</th><th>HardwareRisk</th></tr>
+<tr><td>Market data, pipeline tracking, general document search</td><td>Fluent but unverified; can follow hidden instructions</td><td>Hardware risk taxonomy, calculators, quote verification, code-computed score</td></tr></table>
+<p class="sub">Every risk must cite an exact quote. A verifier drops any that isn't in the documents.</p></section>
+
+<section><h2>How the agents work</h2>
+<!--DIAGRAM-->
+<p class="sub">7 LLM agents plus code for ingest, verification, and scoring. The documents are written by the startup, so they are untrusted.</p></section>
+
+<section><h2>Demo: one live memo</h2>
+<div class="cols">
+<div><span class="shot" data-file="shots/02_timeline.png" data-alt="Agent timeline"></span><p class="sub">Agents working in parallel</p></div>
+<div><span class="shot" data-file="shots/03_memo.png" data-alt="Risk memo"></span><p class="sub">Memo with cited evidence</p></div>
+</div>
+<p class="sub">{{w_name}}: score {{w_score}}, {{w_rec}} ({{w_calls}} model calls, {{w_sec}} s)</p></section>
+
+<section><h2>Cost to run</h2><div class="bar"></div>
+<div class="cols">
+<div><div class="big">{{o_cost}}</div><p class="sub">per memo, measured over {{n}} live runs</p></div>
+<div><div class="big">{{o_user_month}}</div><p class="sub">per investor per month ({{R}} memos)</p></div>
+<div><div class="big">{{o_10k}}</div><p class="sub">per month for 10,000 investors</p></div>
+</div>
+<p>{{verdict}}</p>
+<p class="sub">Tokens measured; prices are {{price_src}}.</p></section>
+
+<section><h2>Safety</h2><div class="bar"></div>
+<ul>
+<li>Documents are untrusted: injection scan, and the score is computed in code so hidden text can't set it</li>
+<li>Every finding needs a verified quote; arithmetic comes from calculators</li>
+<li>Injected data rooms defended: {{o_inj}}. Tests: {{pytest}}</li>
+</ul>
+<span class="shot" data-file="shots/04_attack_blocked.png" data-alt="Injection blocked"></span></section>
+
+<section><h2>Impact</h2><div class="bar"></div>
+<div class="cols">
+<div><div class="big">{{o_recall}}</div><p class="sub">planted risks found in the evaluation</p></div>
+<div><div class="big">{{manual_min}} &rarr; {{app_min}}</div><p class="sub">investor minutes per screen (assumed manual baseline)</p></div>
+</div>
+<p class="sub">Data rooms are synthetic and time savings are modelled with stated assumptions. No real-user pilot yet.</p></section>
+
+<section><h2>What's next</h2><div class="bar"></div>
+<ul>
+<li>Test on anonymized past deals and compare with what actually went wrong</li>
+<li>Read spreadsheets and drawings; add reference-call and expert-review steps</li>
+<li>Firm-specific risk rubric and maintained regulatory and supply data</li>
+</ul>
+<p class="sub">Limits today: text only, synthetic data, small lookup tables.</p></section>
+
+</div></div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+<script>Reveal.initialize({hash:true,width:1280,height:720,margin:0.04,transition:'fade',controls:true,progress:true});</script>
+</body></html>

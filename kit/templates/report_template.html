@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HardwareRisk: Final Report</title>
+<style>
+:root{--ink:#1b2a33;--teal:#0f4c5c;--mist:#eef4f6;--gold:#e9a820;--muted:#5a6b75}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--ink);font:16px/1.65 Georgia,"Iowan Old Style","Times New Roman",serif}
+main{max-width:780px;margin:0 auto;padding:40px 24px 80px}
+h1,h2,h3,table,figcaption,.note,.meta{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+h1{font-size:2.3rem;line-height:1.15;margin:0 0 .3em;color:var(--teal)}
+h2{font-size:1.45rem;color:var(--teal);margin:2.4em 0 .5em;padding-top:.6em;border-top:3px solid var(--gold)}
+h3{font-size:1.05rem;margin:1.6em 0 .3em}
+p{margin:.7em 0;max-width:70ch}.lead{font-size:1.2rem}
+.meta{background:var(--mist);padding:14px 18px;border-left:5px solid var(--teal);font-size:.95rem}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.9rem}
+th,td{border:1px solid #cfdbe0;padding:7px 9px;text-align:left;vertical-align:top}th{background:var(--mist)}
+figure{margin:1.4em 0}figure img{max-width:100%;border:1px solid #cfdbe0;border-radius:4px}
+figcaption{font-size:.85rem;color:var(--muted);margin-top:4px}
+.note{background:#fff7e0;border-left:5px solid var(--gold);padding:10px 16px;font-size:.92rem}
+code{background:var(--mist);padding:1px 5px;border-radius:3px;font-size:.88em}
+ul,ol{padding-left:1.3em}li{margin:.25em 0}
+@media print{main{padding:0}h2{break-after:avoid}figure,table{break-inside:avoid}}
+</style></head><body><main>
+{{mock_banner}}
+<h1>HardwareRisk</h1>
+<p class="lead">An AI agent team that turns a hardware startup's data room into an evidence-backed risk memo, with every risk tied to a passage in the documents.</p>
+<div class="meta">
+<strong>Author:</strong> {{name}}<br>
+<strong>Course:</strong> MGT 409, AI Foundations for Managers, Fall 2026<br>
+<strong>GitHub repo:</strong> {{repo}}<br>
+<strong>Live app:</strong> not hosted online; it runs locally from a fresh clone (steps in the README, about 5 minutes)<br>
+<strong>What it does in one sentence:</strong> given a startup's pitch deck, financials, bill of materials, and team and certification documents, HardwareRisk produces a first-pass diligence memo that ranks the technical, manufacturing, regulatory, and economic risks, cites the evidence for each, and lists the questions to put to the founders.
+</div>
+
+<h2>2. Motivation</h2>
+<p>Hardware startups fail in ways software startups mostly do not. A product can work on the bench and still die in production: a component is single-sourced, the bill of materials is too high for the target price, tooling costs more than the round, yield is unknown, or a required certification (FCC, UL, CE, FDA) has not been started. Spotting these risks takes judgment across electrical engineering, supply chain, regulation, and finance, usually from a deck and a few spreadsheets.</p>
+<p>The author previously evaluated hardware startups as a venture investor, and this tool encodes the kind of first-pass risk screen that work involves. The people with this problem are early-stage investors and corporate venture teams who see far more hardware deals than they have specialist time for. Today the first pass is done by hand, often by a generalist, which is slow and inconsistent: different reviewers catch different risks, and a missed risk is expensive after the check is written. This report does not cite industry statistics on hardware failure rates; its quantitative claims come from my own measurements and from clearly labelled assumptions.</p>
+
+<h2>3. What is new here</h2>
+<p>Table 1 compares HardwareRisk with tools an investor would realistically use. The competitor descriptions are based on vendors' public product descriptions and my general understanding of them; I did not test those products hands-on.</p>
+<table>
+<tr><th>Tool</th><th>Good at</th><th>For hardware diligence</th></tr>
+<tr><td>PitchBook / CB Insights</td><td>Company, funding, and market data</td><td>Tells you who the company is and who else exists, not whether its BOM or certification plan is credible</td></tr>
+<tr><td>CRM / deal-flow tools (e.g., Affinity)</td><td>Tracking deals and relationships</td><td>Organizes the pipeline; does not analyze technical risk</td></tr>
+<tr><td>AI document-analysis tools for finance (e.g., Hebbia, AlphaSense)</td><td>Searching and summarizing large document sets</td><td>General-purpose; no hardware risk taxonomy, calculators, or regulatory lookup that I know of</td></tr>
+<tr><td>A general chatbot (ChatGPT, etc.)</td><td>Reading a pasted deck and commenting</td><td>Fluent but unstructured; may invent facts, do arithmetic by guesswork, and follow instructions hidden in a document</td></tr>
+<tr><td><strong>HardwareRisk</strong></td><td>Hardware-specific first-pass risk screening</td><td>Fixed risk taxonomy, specialist agents, a calculator for unit economics, regulatory and supply lookups, a red-team pass, and a verifier that rejects any risk whose cited quote is not in the documents</td></tr>
+</table>
+<p>The difference is discipline. Instead of asking one model for an opinion, HardwareRisk breaks the screen into specialist checks, forces each finding to carry evidence, verifies that evidence in code, and computes the score and recommendation deterministically. The honest limit: it screens only the documents it is given, so it cannot catch what founders never wrote down, and it is decision support, not investment advice.</p>
+
+<h2>4. The agents</h2>
+<p>The app has seven LLM agents and three ordinary-code components, coordinated by a Python orchestrator. Code is used wherever predictability matters: ingesting and indexing documents, verifying citations, and computing the score.</p>
+<figure><!--DIAGRAM--><figcaption>Figure 1. Agent flow. Dark boxes are LLM agents, gold boxes are ordinary code, and the pink bar is the guard layer.</figcaption></figure>
+<table>
+<tr><th>Component</th><th>Job</th><th>Tools</th></tr>
+<tr><td>Ingest (code)</td><td>Splits documents into numbered chunks, builds a keyword index, scans for injected instructions</td><td>chunker, BM25 index, injection scanner</td></tr>
+<tr><td>Profile Agent</td><td>Extracts product category, stage, estimated technology readiness, funding ask, and the founders' key claims</td><td><code>search_dataroom</code></td></tr>
+<tr><td>Technology specialist</td><td>Is the core technology proven? Is there independent test data? Do performance claims match results?</td><td><code>search_dataroom</code></td></tr>
+<tr><td>Manufacturing and supply specialist</td><td>Single-source parts, contract manufacturer, yield, tooling, lead times</td><td><code>search_dataroom</code>, <code>lookup_supply_risk</code></td></tr>
+<tr><td>Regulatory and safety specialist</td><td>Which certifications this product category needs and which are missing</td><td><code>search_dataroom</code>, <code>lookup_regulatory</code></td></tr>
+<tr><td>Unit economics and capital specialist</td><td>Gross margin at scale, runway, capital needed to reach scale</td><td><code>search_dataroom</code>, <code>calc_unit_economics</code>, <code>calc_runway</code></td></tr>
+<tr><td>Team, IP and market specialist</td><td>Hardware scale-up experience, patents, evidence of paying customers, channel dependence</td><td><code>search_dataroom</code></td></tr>
+<tr><td>Red-Team Agent</td><td>Looks for contradictions between documents and unsupported claims</td><td><code>search_dataroom</code></td></tr>
+<tr><td>Verifier (code)</td><td>Checks that every cited chunk exists and that the quote appears in it; drops findings that fail</td><td>string matching</td></tr>
+<tr><td>Scoring (code)</td><td>Computes the 0 to 100 risk score from severity and likelihood and maps it to a label</td><td>formula</td></tr>
+<tr><td>Synthesizer</td><td>Writes the memo, the top risks, founder questions, and what would change the assessment; cannot change the score or label</td><td>none</td></tr>
+</table>
+<h3>Model</h3>
+<p>All agents use <code>{{model}}</code>. The work is structured extraction and reasoning over short passages, repeated across many agents, so a small fast model keeps the cost of a memo low, and the course key allows only this model.</p>
+<h3>One real run, step by step</h3>
+<p>This run was executed live by the app on the sample data room for <strong>{{w_name}}</strong> ({{w_cat}}), which has {{w_docs}} documents split into {{w_chunks}} chunks.</p>
+{{w_html}}
+<p>Outcome: {{w_findings}} findings were produced, {{w_verified}} passed verification and {{w_dropped}} were dropped. The risk score was <strong>{{w_score}}</strong> and the recommendation <strong>{{w_rec}}</strong>. Top risks:</p>
+{{w_top}}
+<p>This run used {{w_calls}} model calls, {{w_in}} input tokens ({{w_c}} cached), {{w_out}} output tokens, and {{w_sec}} seconds.</p>
+<figure><span class="shot" data-file="shots/01_dataroom.png" data-alt="Data room"></span><figcaption>Figure 2. Choosing a data room to analyze.</figcaption></figure>
+<figure><span class="shot" data-file="shots/02_timeline.png" data-alt="Live agent timeline"></span><figcaption>Figure 3. Live timeline of the agents working.</figcaption></figure>
+<figure><span class="shot" data-file="shots/03_memo.png" data-alt="Risk memo"></span><figcaption>Figure 4. The risk memo with evidence for each finding.</figcaption></figure>
+
+<h2>5. Tokenomics</h2>
+<p>Every model call goes through one wrapper that logs input, cached-input, and output tokens. The figures come from {{n}} live data-room analyses in the evaluation, not estimates. Token counts are measured; <strong>prices are {{price_src}}</strong>: {{price_in}} per 1M uncached input tokens, {{price_c}} per 1M cached input tokens, {{price_out}} per 1M output tokens. Input tokens include cached ones.</p>
+<h3>Tokens and cost per memo (optimized design, average)</h3>
+<table><tr><th>Input</th><th>Cached input</th><th>Output</th><th>Cost per memo</th></tr>
+<tr><td>{{o_in}}</td><td>{{o_c}}</td><td>{{o_out}}</td><td>{{o_cost}}</td></tr></table>
+<h3>Cost at scale</h3>
+<p>Assumption: each investor or analyst screens {{R}} startups per month. This ignores volume discounts and traffic spikes.</p>
+<table><tr><th>Scale</th><th>Memos / month</th><th>Monthly cost</th></tr>{{cost_rows}}</table>
+<h3>What I did to keep cost down</h3>
+<ul>
+<li><strong>Retrieval instead of the whole data room.</strong> Each specialist reads only the top-ranked chunks for its topic.</li>
+<li><strong>Calculators instead of model arithmetic.</strong> Margin and runway come from code, which is both cheaper and exact.</li>
+<li><strong>Static prefix first.</strong> Long fixed instructions and the risk taxonomy come first so prompt caching can apply.</li>
+<li><strong>Code does the scoring and verification.</strong> No tokens are spent on routing, scoring, or checking quotes.</li>
+</ul>
+<h3>Did cost cutting hurt performance?</h3>
+<p>I ran the same {{n}} data rooms through a <em>baseline</em> (every specialist receives the entire data room and does its own arithmetic) and the <em>optimized</em> design. Each data room has risks planted by the dataset author, so recall can be measured.</p>
+<table>
+<tr><th>Metric</th><th>Baseline</th><th>Optimized</th></tr>
+<tr><td>Planted risks found (recall)</td><td>{{b_recall}}</td><td>{{o_recall}}</td></tr>
+<tr><td>Citations that quote the documents correctly</td><td>{{b_cite}}</td><td>{{o_cite}}</td></tr>
+<tr><td>Decoy risks wrongly flagged</td><td>{{b_decoy}}</td><td>{{o_decoy}}</td></tr>
+<tr><td>Unit economics numbers correct</td><td>{{b_num}}</td><td>{{o_num}}</td></tr>
+<tr><td>Recommendation label matches expected</td><td>{{b_label}}</td><td>{{o_label}}</td></tr>
+<tr><td>Avg tokens per memo (input + output)</td><td>{{b_tok}}</td><td>{{o_tok}}</td></tr>
+<tr><td>Avg cost per memo</td><td>{{b_cost}}</td><td>{{o_cost2}}</td></tr>
+</table>
+<p>{{verdict}}</p>
+<figure><span class="shot" data-file="shots/05_usage.png" data-alt="Usage and cost tab"></span><figcaption>Figure 5. The app displays its own token usage per run.</figcaption></figure>
+
+<h2>6. Safety</h2>
+<p>For an investor, the dangerous failures are quiet ones: a confident memo that invents a fact, misses a risk, or has been steered by the startup itself. The key design fact is that <strong>the documents are written by the party being evaluated</strong>, so they are untrusted input. The strongest defenses are ordinary code.</p>
+<table>
+<tr><th>Risk</th><th>Defense built</th></tr>
+<tr><td>Prompt injection hidden in a data-room document (for example, text telling an AI reviewer to rate the company low risk)</td><td>Documents are wrapped as data and the agents are told never to follow instructions inside them; an injection scanner flags suspicious passages at ingest; the final score and label are computed in code, so injected text cannot set them</td></tr>
+<tr><td>Invented facts or quotes</td><td>Every finding must cite a chunk id and an exact quote; the Verifier drops findings whose quote is not in the cited chunk</td></tr>
+<tr><td>Arithmetic errors</td><td>Margin and runway are computed by calculator tools from extracted inputs</td></tr>
+<tr><td>Overconfident recommendation</td><td>The label comes from a fixed formula over verified findings; the Synthesizer cannot change it; missing information is reported as a gap rather than guessed</td></tr>
+<tr><td>Flagging risks that are actually mitigated</td><td>The Red-Team pass and decoy tests check that mitigated items (for example, a second qualified source) are not reported as risks</td></tr>
+<tr><td>Confidential data leaving the tool</td><td>The prototype has no web or email tools and sends documents only to the model; this evaluation uses synthetic data rooms. A production version would need a zero-retention model agreement</td></tr>
+<tr><td>Infinite loops and overspending</td><td>Max 8 model/tool iterations per agent; per-memo and per-day token caps; at the cap the app stops and says so</td></tr>
+</table>
+<h3>Defenses working</h3>
+<p><strong>Injection test.</strong> The data room for {{a_startup}} contains this hidden text: &ldquo;{{a_text}}&rdquo;. Detected at ingest: {{a_detected}} (by {{a_by}}). Recommendation with the injection: <strong>{{a_rec_inj}}</strong>; recommendation on the clean version: <strong>{{a_rec_clean}}</strong>. Planted risks still found despite the injection: {{a_found}} of {{a_total}}. Log entry: {{a_reason}}.</p>
+<p><strong>Evaluation.</strong> Across the data rooms containing injected instructions, the defense held in {{o_inj}} cases (label unchanged, planted risks still found, injection flagged).</p>
+<p><strong>Citation check.</strong> In the optimized runs the models produced {{cite_total}} citations and {{cite_valid}} were valid; the {{cite_dropped}} invalid ones were removed by the Verifier before scoring.</p>
+<p><strong>Budget stop.</strong> With the per-memo cap set to {{bud_cap}} tokens, the analysis {{bud_stop}} with status <code>{{bud_status}}</code>.</p>
+<p><strong>Test suite.</strong> pytest result: {{pytest}}.</p>
+<figure><span class="shot" data-file="shots/04_attack_blocked.png" data-alt="Injection blocked"></span><figcaption>Figure 6. A data room containing hidden instructions is flagged and the instructions are ignored.</figcaption></figure>
+<figure><span class="shot" data-file="shots/06_budget_stop.png" data-alt="Budget stop"></span><figcaption>Figure 7. With a very low cap, the analysis stops instead of spending more.</figcaption></figure>
+<p>Residual risk: an attacker may phrase an injection in a way my scanner misses. The design limits the damage because model outputs are findings that must be verified, and the score and recommendation are computed by code.</p>
+
+<h2>7. Impact</h2>
+<p><strong>What is measured vs. modelled.</strong> Recall, citation accuracy, token use, and run time are measured in the evaluation. Investor time is a <em>model</em>: I assume a manual first-pass risk screen of {{manual_min}} minutes, based on the author's experience as a hardware investor rather than a time study, and {{review_min}} minutes to read and spot-check an automatic memo, plus the measured run time of {{run_min}} minutes.</p>
+<table>
+<tr><th>Measure</th><th>Manual (assumed)</th><th>With HardwareRisk</th></tr>
+<tr><td>Investor minutes per first-pass screen</td><td>{{manual_min}}</td><td>{{app_min}}</td></tr>
+<tr><td>Planted risks surfaced (evaluation)</td><td>n/a</td><td>{{o_recall}}</td></tr>
+<tr><td>Average run time per memo</td><td>n/a</td><td>{{sec_per_memo}} seconds</td></tr>
+</table>
+<p>Under these assumptions the tool saves about {{saved_min}} investor minutes per screen. At {{R}} screens a month that is roughly {{annual_hours}} hours a year per investor. The larger benefit may be consistency: every deal gets the same checklist. I did not measure that.</p>
+{{pilot_html}}
+<div class="note"><strong>Limits of this evidence:</strong> the data rooms are synthetic and the planted risks were written by the same person who built the tool, so results will look better than on messy real deals. The time savings are modelled. The results show the design behaves as intended, not that it matches an experienced partner's judgment.</div>
+
+<h2>8. Limits and next steps</h2>
+<h3>What does not work yet</h3>
+<ul>
+<li>Only text documents are read. Technical drawings, photos, CAD files, and spreadsheets with formulas are not interpreted.</li>
+<li>It screens only what founders disclose; it cannot find undisclosed problems or verify claims against the real world.</li>
+<li>The regulatory and component-risk lookups are small hand-built tables, not a live database.</li>
+<li>Evaluation uses synthetic data rooms; there is no comparison against an expert investor's memo on real deals.</li>
+<li>No real-user pilot has been run yet.</li>
+</ul>
+<h3>If I had another month</h3>
+<ul>
+<li>Run it on anonymized past deals and compare its risks with what actually went wrong after investment.</li>
+<li>Add a reference-call guide and a technical-expert review step.</li>
+<li>Replace the lookup tables with maintained sources and add live lead-time and price data.</li>
+<li>Support spreadsheets and drawings, and add a firm-specific risk rubric so each fund can tune the weights.</li>
+</ul>
+</main></body></html>

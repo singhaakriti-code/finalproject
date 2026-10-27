@@ -1,0 +1,31 @@
+<svg viewBox="0 0 900 430" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="HardwareRisk agent flow" style="width:100%;height:auto;font-family:system-ui,Segoe UI,Arial,sans-serif">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0f4c5c"/></marker></defs>
+<text x="450" y="28" text-anchor="middle" font-size="14" fill="#0f4c5c" font-weight="600">Orchestrator (plain Python: decides who runs next, enforces every cap)</text>
+<line x1="20" y1="42" x2="880" y2="42" stroke="#0f4c5c" stroke-width="2" stroke-dasharray="6 4"/>
+<g font-size="14" text-anchor="middle">
+<rect x="20" y="75" width="140" height="70" rx="6" fill="#fff" stroke="#0f4c5c" stroke-width="2"/><text x="90" y="105" fill="#1b2a33">Data room</text><text x="90" y="125" font-size="12" fill="#5a6b75">deck, BOM, financials</text>
+<rect x="190" y="75" width="150" height="70" rx="6" fill="#e9a820"/><text x="265" y="105" fill="#1b2a33" font-weight="600">Ingest (code)</text><text x="265" y="125" font-size="12" fill="#1b2a33">chunk, index, scan</text>
+<rect x="370" y="75" width="150" height="70" rx="6" fill="#0f4c5c"/><text x="445" y="105" fill="#fff" font-weight="600">Profile Agent</text><text x="445" y="125" font-size="12" fill="#cfe3e8">claims, stage, TRL</text>
+<rect x="550" y="58" width="330" height="140" rx="8" fill="#eef4f6" stroke="#0f4c5c" stroke-width="2"/>
+<text x="715" y="78" font-size="12" fill="#0f4c5c" font-weight="600">5 specialist agents in parallel</text>
+<rect x="560" y="88" width="100" height="42" rx="5" fill="#0f4c5c"/><text x="610" y="113" font-size="12" fill="#fff">Technology</text>
+<rect x="670" y="88" width="100" height="42" rx="5" fill="#0f4c5c"/><text x="720" y="106" font-size="11" fill="#fff">Manufacturing</text><text x="720" y="120" font-size="11" fill="#fff">&amp; supply</text>
+<rect x="780" y="88" width="90" height="42" rx="5" fill="#0f4c5c"/><text x="825" y="106" font-size="11" fill="#fff">Regulatory</text><text x="825" y="120" font-size="11" fill="#fff">&amp; safety</text>
+<rect x="560" y="138" width="100" height="42" rx="5" fill="#0f4c5c"/><text x="610" y="156" font-size="11" fill="#fff">Unit econ.</text><text x="610" y="170" font-size="11" fill="#fff">&amp; capital</text>
+<rect x="670" y="138" width="100" height="42" rx="5" fill="#0f4c5c"/><text x="720" y="156" font-size="11" fill="#fff">Team, IP</text><text x="720" y="170" font-size="11" fill="#fff">&amp; market</text>
+<text x="825" y="156" font-size="11" fill="#5a6b75">tools: search,</text><text x="825" y="170" font-size="11" fill="#5a6b75">calculator, lookups</text>
+<rect x="720" y="250" width="160" height="70" rx="6" fill="#0f4c5c"/><text x="800" y="280" fill="#fff" font-weight="600">Red-Team Agent</text><text x="800" y="300" font-size="12" fill="#cfe3e8">contradictions, gaps</text>
+<rect x="535" y="250" width="155" height="70" rx="6" fill="#e9a820"/><text x="612" y="280" fill="#1b2a33" font-weight="600">Verifier (code)</text><text x="612" y="300" font-size="12" fill="#1b2a33">checks every citation</text>
+<rect x="350" y="250" width="155" height="70" rx="6" fill="#e9a820"/><text x="427" y="280" fill="#1b2a33" font-weight="600">Scoring (code)</text><text x="427" y="300" font-size="12" fill="#1b2a33">risk score, label</text>
+<rect x="165" y="250" width="155" height="70" rx="6" fill="#0f4c5c"/><text x="242" y="280" fill="#fff" font-weight="600">Synthesizer</text><text x="242" y="300" font-size="12" fill="#cfe3e8">writes the memo</text>
+<rect x="20" y="250" width="120" height="70" rx="6" fill="#fff" stroke="#e9a820" stroke-width="3"/><text x="80" y="280" fill="#1b2a33" font-weight="600">Risk memo</text><text x="80" y="300" font-size="12" fill="#5a6b75">for the investor</text>
+</g>
+<g stroke="#0f4c5c" stroke-width="2" fill="none" marker-end="url(#ar)">
+<line x1="160" y1="110" x2="188" y2="110"/><line x1="340" y1="110" x2="368" y2="110"/><line x1="520" y1="110" x2="548" y2="110"/>
+<line x1="800" y1="198" x2="800" y2="248"/><line x1="720" y1="285" x2="692" y2="285"/><line x1="535" y1="285" x2="507" y2="285"/><line x1="350" y1="285" x2="322" y2="285"/><line x1="165" y1="285" x2="142" y2="285"/>
+</g>
+<text x="450" y="342" text-anchor="middle" font-size="12" fill="#5a6b75">Dark boxes are LLM agents. Gold boxes are ordinary code. Unverified findings are dropped before scoring.</text>
+<rect x="20" y="360" width="860" height="52" rx="6" fill="#fbe3ee" stroke="#b0235f" stroke-width="2"/>
+<text x="450" y="382" text-anchor="middle" font-size="14" fill="#7d1844" font-weight="600">Guard layer around every step</text>
+<text x="450" y="400" text-anchor="middle" font-size="12" fill="#7d1844">documents treated as untrusted data, injection scan, citation check, loop cap, token budget</text>
+</svg>
